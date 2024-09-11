@@ -57,10 +57,24 @@ class JuegoMatriz {
                 territorio[fila][columna] = "C ";
             }
         }
+    } // Se puede retornar la posición del cofre
+
+    public static void despejarVia(String[][] territorio) {
+        if (territorio[1][2] == "# ") {
+            territorio[1][2] = ". ";
+        }
+        if (territorio[2][1] == "# ") {
+            territorio[2][1] = ". ";
+        }
     }
 
     public static void spawnearPersonaje(String[][] territorio) {
         territorio[1][1] = "P ";
+        despejarVia(territorio);
+    }
+
+    public static String[] informacionPersonaje() {
+
     }
 
     public static void colocarMeta(String[][] territorio) {
