@@ -35,6 +35,43 @@ class JuegoMatriz {
         }
     }
 
+    public static void spawnearMalo(String[][] territorio) { // Método que coloca enemigos dentro del mapa
+        Random azar = new Random();
+        int enemigos = 5;
+        for (int malo = 0; malo < enemigos; malo++) {
+            int fila = azar.nextInt(8) + 1; // Esto evita que se escojan las filas y columnas donde se define la frontera
+            int columna = azar.nextInt(8) + 1;
+            if (territorio[fila][columna] == null) { // Para asegurarse de que no se escojan lugares ya ocupados
+                territorio[fila][columna] = "E ";
+            }
+        }
+    }
+
+    public static void ponerCofre(String[][] territorio) {
+        Random azar = new Random();
+        int cofres = 3;
+        for (int cofre = 0; cofre < cofres; cofre++) {
+            int fila = azar.nextInt(8) + 1; // Esto evita que se escojan las filas y columnas donde se define la frontera
+            int columna = azar.nextInt(8) + 1;
+            if (territorio[fila][columna] == null) { // Para asegurarse de que no se escojan lugares ya ocupados
+                territorio[fila][columna] = "C ";
+            }
+        }
+    }
+
+    public static void spawnearPersonaje(String[][] territorio) {
+        territorio[1][1] = "P ";
+    }
+
+    public static void colocarMeta(String[][] territorio) {
+        Random azar = new Random();
+        int fila = azar.nextInt(8) + 1; // Esto evita que se escojan las filas y columnas donde se define la frontera
+        int columna = azar.nextInt(8) + 1;
+        if (territorio[fila][columna] == null) { // Para asegurarse de que no se escojan lugares ya ocupados
+            territorio[fila][columna] = "X ";
+        }
+    }
+
     public static void mostrarTerritorio(String[][] territorio) { // Método para que el mapa se muestre
         for (int fila = 0; fila < territorio.length; fila++) {
             for (int columna = 0; columna < territorio.length; columna++) {
@@ -48,10 +85,18 @@ class JuegoMatriz {
         }
     }
 
-    public static void inicializarJuego() {
+    public static void inicializarMapa() {
         String[][] mapa = crearMapa();
         delimitarMapa(mapa);
         colocarObstaculo(mapa);
+        spawnearMalo(mapa);
+        ponerCofre(mapa);
+        spawnearPersonaje(mapa);
+        colocarMeta(mapa);
         mostrarTerritorio(mapa);
+    }
+
+    public static void inicializarJuego() {
+        inicializarMapa();
     }
 }
