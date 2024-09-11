@@ -1,9 +1,9 @@
+import java.util.Random;
+
 class JuegoMatriz {
 
     public static void main(String[] args) {
-        String[][] mapa = crearMapa();
-        delimitarMapa(mapa);
-        mostrarTerritorio(mapa);
+        inicializarJuego();
     }
 
     public static String[][] crearMapa() { // Se crea el método para crear el mapita
@@ -23,6 +23,18 @@ class JuegoMatriz {
         return territorio;
     }
 
+    public static void colocarObstaculo(String[][] territorio) {
+        Random azar = new Random();
+        int cantidadObstaculos = 10; // Una cantidad máxima de obstáculos predefinida
+        for (int obstaculo = 0; obstaculo < cantidadObstaculos; obstaculo++) {
+            int fila = azar.nextInt(8) + 1; // Esto evita que se escojan las filas y columnas donde se define la frontera
+            int columna = azar.nextInt(8) + 1;
+            if (territorio[fila][columna] == null) {
+                territorio[fila][columna] = "# ";
+            }
+        }
+    }
+
     public static void mostrarTerritorio(String[][] territorio) { // Método para que el mapa se muestre
         for (int fila = 0; fila < territorio.length; fila++) {
             for (int columna = 0; columna < territorio.length; columna++) {
@@ -34,5 +46,12 @@ class JuegoMatriz {
             }
             System.out.println();
         }
+    }
+
+    public static void inicializarJuego() {
+        String[][] mapa = crearMapa();
+        delimitarMapa(mapa);
+        colocarObstaculo(mapa);
+        mostrarTerritorio(mapa);
     }
 }
