@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.Scanner;
 
 class JuegoMatriz {
 
@@ -73,9 +74,123 @@ class JuegoMatriz {
         despejarVia(territorio);
     }
 
-    public static String[] informacionPersonaje() {
-
+    public static int[] informacionPersonaje() {
+        int[] personaje = new int[4];
+        personaje[0] = 0; // Almacena la coordenada en X
+        personaje[1] = 1; // ídem para la coordenada Y
+        personaje[2] = 100; // La vida inicial del mono
+        personaje[3] = 15; // Y el ataque con el que comienza
+        return personaje;
     }
+
+    public static void moverPersonaje(String[][] territorio, int[] personaje) {
+        Scanner mover = new Scanner(System.in);
+        System.out.println("Ingrese su movimiento (w/a/s/d): ");
+        String movimiento = mover.nextLine().toLowerCase();
+
+        int originalX = personaje[0];
+        int originalY = personaje[1];
+
+        int[] nuevasCoordenadas = movimientoDelPersonaje(movimiento, originalX, originalY);
+        int nuevaX = nuevasCoordenadas[0];
+        int nuevaY = nuevasCoordenadas[1];
+
+        boolean esValido = validarDecision(movimiento, originalX, originalY);
+        if (!esValido) {
+            return; // Si el movimiento es inválido, no hace nada
+        }
+
+        boolean movimientoValido = comprobarMovimiento(territorio, nuevaX, nuevaY);
+        if (!movimientoValido) {
+            return; // Si hay bordes u obstáculos, no hace nada
+        }
+        cambiarDePosicionAlPersonaje(territorio, personaje, nuevaX, nuevaY);
+
+        mostrarTerritorio(territorio);
+    }
+
+
+    public static int[] movimientoDelPersonaje(String movimiento, int originalX, int originalY) {
+        int nuevaX = originalX;
+        int nuevaY = originalY;
+        switch (movimiento) {
+            case "w":
+                nuevaY--;
+                break;
+            case "s":
+                nuevaY++;
+                break;
+            case "a":
+                nuevaX--;
+                break;
+            case "d":
+                nuevaX++;
+                break;
+        }
+
+        return new int[]{nuevaX, nuevaY};
+    }
+
+    public static boolean validarDecision(String movimiento, int originalX, int originalY) {
+        int nuevaX = originalX;
+        int nuevaY = originalY;
+        switch (movimiento) {
+            case "w":
+                if (originalY > 0) nuevaY--;
+                else {
+                    System.out.println("Movimiento inválido. Estás chocando con el borde del mapa.");
+                    return false;
+                }
+                break;
+            case "s":
+                if (originalY < 9) nuevaY++;
+                else {
+                    System.out.println("Movimiento inválido. Estás chocando con el borde del mapa.");
+                    return false;
+                }
+                break;
+            case "a":
+                if (originalX > 0) nuevaX--;
+                else {
+                    System.out.println("Movimiento inválido. Estás chocando con el borde del mapa.");
+                    return false;
+                }
+                break;
+            case "d":
+                if (originalX < 9) nuevaX++;
+                else {
+                    System.out.println("Movimiento inválido. Estás chocando con el borde del mapa.");
+                    return false;
+                }
+                break;
+            default:
+                System.out.println("Movimiento no válido. Usa w, a, s, d.");
+                return false;
+        }
+        System.out.println("Moviendo a: (" + nuevaX + ", " + nuevaY + ")");
+        return true;
+    }
+
+    public static boolean comprobarMovimiento(String[][] territorio, int nuevaX, int nuevaY) {
+        if (territorio[nuevaX][nuevaY] != null && !territorio[nuevaX][nuevaY].equals("# ")) {
+            System.out.println("Movimiento inválido. Hay un obstáculo en la nueva posición.");
+            return false;
+        }
+        return true;
+    }
+
+    public static String cambiarDePosicionAlPersonaje(String[][] territorio, int[] personaje, int nuevaX, int nuevaY) {
+        territorio[personaje[0]][personaje[1]] = null;
+
+        personaje[0] = nuevaX;
+        personaje[1] = nuevaY;
+
+        territorio[personaje[0]][personaje[1]] = "P ";
+
+        return "Moviendo al personaje a la posición: (" + personaje[0] + ", " + personaje[1] + ")";
+    }
+
+
 
     public static void colocarMeta(String[][] territorio) {
         Random azar = new Random();
