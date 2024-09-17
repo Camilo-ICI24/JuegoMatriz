@@ -104,6 +104,10 @@ class JuegoMatriz {
             return;
         }
 
+        if ("C ".equals(territorio[nuevaX][nuevaY])) {
+            recogerCofre(territorio, personaje);
+        }
+
         cambiarDePosicionAlPersonaje(territorio, personaje, nuevaX, nuevaY);
 
         int[][] coordenadasMalos = obtenerCoordenadasMalos(territorio);
@@ -231,7 +235,7 @@ class JuegoMatriz {
         int eleccion = decisionBatalla();
         if (eleccion == 1) {
             System.out.println("¡Has decidido pelear!");
-            batallaEpicca(personaje);
+            batallaEpicca(personaje, territorio);
         } else if (eleccion == 2) {
             System.out.println("¡Has decidido huir!");
         } else {
@@ -249,7 +253,7 @@ class JuegoMatriz {
         return eleccion;
     }
 
-    public static void batallaEpicca(int[] personaje) {
+    public static void batallaEpicca(int[] personaje, String[][] territorio) {
         Random azar = new Random();
         int vidaEnemigo = 50; // Vida del enemigo
         int ataqueEnemigoMaximo = 45; // Para que no esté tan roto
@@ -264,6 +268,7 @@ class JuegoMatriz {
 
             if (vidaEnemigo <= 0) {
                 System.out.println("¡Has derrotado al enemigo!");
+                territorio[personaje[0]][personaje[1]] = null;
                 return;
             }
 
@@ -302,6 +307,31 @@ class JuegoMatriz {
         return personaje[0] == coordenadasMalo[0] && personaje[1] == coordenadasMalo[1];
     }
 
+    public static void recogerCofre(String[][] territorio, int[] personaje) {
+        if ("C ".equals(territorio[personaje[0]][personaje[1]])) {
+            System.out.println("¡Has recogido un cofre!");
+            Random premio = new Random();
+            territorio[personaje[0]][personaje[1]] = null;
+            int fortuna = premio.nextInt(3);
+            recompensasCofre(fortuna, personaje);
+        }
+    }
+
+    public static void recompensasCofre(int azar, int[] personaje) {
+        if (azar == 1) {
+            System.out.println("Bendición Místico del Rocío Universal");
+            System.out.println("Ganas 70 de vida");
+            personaje[2] += 70;
+        } else if (azar == 2) {
+            System.out.println("Zarpazo de las Grietas del Abismo");
+            System.out.println("Pierdes 45 de vida");
+            personaje[2] -= 45;
+        } else if (azar == 3) {
+            System.out.println("Canallada del Bromista Juguetón");
+            System.out.println("No pasa nada");
+        }
+    }
+
     public static void jugarJuego(String[][] mapa) {
         int[] personaje = informacionPersonaje();
         boolean juegoActivo = true;
@@ -329,6 +359,8 @@ class JuegoMatriz {
         if (verificarMeta(personaje, coordenadasMeta)) {
             System.out.println("¡Has alcanzado la meta! ¡Juego terminado!");
             return false; // Termina el juego
+        } else if (personaje[2] == 0) {
+            System.out.println("Fin del juego :(");
         }
         return true;
     }
