@@ -5,8 +5,12 @@ class JuegoMatriz {
 
     public static void main(String[] args) {
         String[][] mapa = crearMapa();
+
         obtenerCoordenadasMeta(mapa);
+        obtenerCoordenadasMalos(mapa);
+
         inicializarMapa(mapa);
+        mostrarTerritorio(mapa);
         jugarJuego(mapa);
     }
 
@@ -82,6 +86,8 @@ class JuegoMatriz {
         int nuevaX = nuevasCoordenadas[0];
         int nuevaY = nuevasCoordenadas[1];
 
+        System.out.println("Moviendo a: (" + nuevaX + ", " + nuevaY + ")");
+
         if (!validarDecision(nuevaX, nuevaY)) {
             System.out.println("Movimiento inválido. Estás chocando con el borde del mapa.");
             return; // Se choca con los bordes
@@ -92,7 +98,22 @@ class JuegoMatriz {
             return; // Movimiento bloqueado por un obstáculo
         }
 
+        if ("E ".equals(territorio[nuevaX][nuevaY])) {
+            System.out.println("Enemigo detectado en la posición: (" + nuevaX + ", " + nuevaY + ")");
+            menuDeBatalla(territorio, personaje);
+            return;
+        }
+
         cambiarDePosicionAlPersonaje(territorio, personaje, nuevaX, nuevaY);
+
+        int[][] coordenadasMalos = obtenerCoordenadasMalos(territorio);
+        for (int[] coordenadasMalo : coordenadasMalos) {
+            if (verificarMalo(new int[]{nuevaX, nuevaY}, coordenadasMalo)) {
+                System.out.println("Enemigo detectado en la posición: (" + nuevaX + ", " + nuevaY + ")");
+                menuDeBatalla(territorio, personaje);
+                return;
+            }
+        }
     }
 
     public static int[] movimientoDelPersonaje(String movimiento, int originalX, int originalY) {
@@ -171,17 +192,50 @@ class JuegoMatriz {
         }
     }
 
-    public static void menuDeBatalla(String[][] territorio, int[] personaje) {
-        if ("E ".equals(territorio[personaje[0]][personaje[1]])) {
-            System.out.println("¡¡ADVERTENCIA!! Enemigo en la posición: (" + personaje[0] + ", " + personaje[1] + ")");
-            int eleccion = decisionBatalla();
-            if (eleccion == 1) {
-                System.out.println("¡Has decidido pelear!");
-            } else if (eleccion == 2) {
-                System.out.println("¡Has decidido huir!");
-            } else {
-                System.out.println("Opción no válida.");
+    public static int contarEnemigos(String[][] territorio) {
+        int contador = 0;
+        for (int fila = 0; fila < territorio.length; fila++) {
+            for (int columna = 0; columna < territorio[fila].length; columna++) {
+                if ("E ".equals(territorio[fila][columna])) {
+                    contador++;
+                }
             }
+        }
+        return contador;
+    }
+
+    public static void llenarCoordenadasMalos(String[][] territorio, int[][] coordenadasMalos) {
+        int line = 0;
+        for (int fila = 0; fila < territorio.length; fila++) {
+            for (int columna = 0; columna < territorio[fila].length; columna++) {
+                if ("E ".equals(territorio[fila][columna])) {
+                    coordenadasMalos[line][0] = fila;
+                    coordenadasMalos[line][1] = columna;
+                    line++;
+                }
+            }
+        }
+    }
+
+    public static int[][] obtenerCoordenadasMalos(String[][] territorio) {
+        int cantidadDeMalos = contarEnemigos(territorio);
+        int[][] coordenadasMalos = new int[cantidadDeMalos][2];
+
+        llenarCoordenadasMalos(territorio, coordenadasMalos);
+
+        return coordenadasMalos;
+    }
+
+    public static void menuDeBatalla(String[][] territorio, int[] personaje) {
+        System.out.println("¡¡ADVERTENCIA!! Enemigo en la posición: (" + personaje[0] + ", " + personaje[1] + ")");
+        int eleccion = decisionBatalla();
+        if (eleccion == 1) {
+            System.out.println("¡Has decidido pelear!");
+            batallaEpicca(personaje);
+        } else if (eleccion == 2) {
+            System.out.println("¡Has decidido huir!");
+        } else {
+            System.out.println("Opción no válida.");
         }
     }
 
@@ -193,6 +247,41 @@ class JuegoMatriz {
         System.out.println("Ahhhh.... elijo ");
         int eleccion = decision.nextInt();
         return eleccion;
+    }
+
+    public static void batallaEpicca(int[] personaje) {
+        Random azar = new Random();
+        int vidaEnemigo = 50; // Vida del enemigo
+        int ataqueEnemigoMaximo = 45; // Para que no esté tan roto
+
+        System.out.println("¡La batalla ha comenzado!");
+
+        while (personaje[2] > 0 && vidaEnemigo > 0) {
+            int ataquePersonaje = personaje[3];
+            vidaEnemigo -= ataquePersonaje;
+            System.out.println("Has atacado al enemigo.");
+            System.out.println("LP enemigo: " + vidaEnemigo);
+
+            if (vidaEnemigo <= 0) {
+                System.out.println("¡Has derrotado al enemigo!");
+                return;
+            }
+
+            int ataqueEnemigo = azar.nextInt(ataqueEnemigoMaximo) + 1;
+            personaje[2] -= ataqueEnemigo;
+            System.out.println("El enemigo te ha atacado. Tu vida restante: " + personaje[2]);
+
+            if (personaje[2] <= 0) {
+                System.out.println("¡Has sido derrotado por el enemigo!");
+                System.exit(0);
+            }
+
+            try {
+                Thread.sleep(1000); // 1 segundo de pausa
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static String[][] inicializarMapa(String[][] mapa) {
@@ -207,6 +296,10 @@ class JuegoMatriz {
 
     public static boolean verificarMeta(int[] personaje, int[] coordenadasMeta) {
         return personaje[0] == coordenadasMeta[0] && personaje[1] == coordenadasMeta[1];
+    }
+
+    public static boolean verificarMalo(int[] personaje, int[] coordenadasMalo) {
+        return personaje[0] == coordenadasMalo[0] && personaje[1] == coordenadasMalo[1];
     }
 
     public static void jugarJuego(String[][] mapa) {
@@ -226,7 +319,6 @@ class JuegoMatriz {
             mostrarTerritorio(mapa);
             juegoActivo = finDelJuego(mapa, personaje, coordenadasMeta);
             if (!juegoActivo) {
-                System.out.println("¡Has alcanzado la meta! ¡Juego terminado!");
                 break;
             }
         }
